@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lifeup-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lifeup
+      POSTGRES_PASSWORD: lifeup
+      POSTGRES_DB: lifeup
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lifeup -d lifeup"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
