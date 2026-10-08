@@ -74,6 +74,7 @@ export default async function TasksPage({
   const all = await db.task.findMany({
     where: {
       userId,
+      goalId: null,
       OR: [{ dueDate: null }, { dueDate: { gte: start, lt: windowEnd } }],
     },
     orderBy: { createdAt: "asc" },
@@ -109,11 +110,11 @@ export default async function TasksPage({
               <h1 className="text-base font-black tracking-widest text-cyan-300 uppercase">Task Tracker</h1>
             </div>
             <div className="bg-[#161f30] rounded-md p-2 border border-cyan-900/60 text-center">
-              <span className="text-[10px] text-cyan-400/90 font-medium block uppercase tracking-wide">Week Start Date</span>
+              <span className="text-xs text-cyan-400/90 font-medium block uppercase tracking-wide">Week Start Date</span>
               <span className="text-xs font-mono font-bold text-cyan-200">{slash(start)}</span>
             </div>
           </div>
-          <div className="text-[9px] text-slate-400 flex items-center justify-between pt-1">
+          <div className="text-xs text-slate-400 flex items-center justify-between pt-1">
             <span>{sumTotal} tugas • {offset === 0 ? "minggu ini" : offset < 0 ? `${-offset} minggu lalu` : `${offset} minggu depan`}</span>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
           </div>
@@ -122,7 +123,7 @@ export default async function TasksPage({
         <div className="col-span-12 lg:col-span-5 bg-[#111622] rounded-xl border border-[#1e293b] p-3 flex flex-col justify-between shadow-md">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Overall Progress</h2>
-            <span className="flex items-center gap-1 text-[10px]">
+            <span className="flex items-center gap-1 text-xs">
               <Link href={`/tasks?w=${offset - 1}`} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700">←</Link>
               <span className="text-slate-400 font-mono">Week Completion</span>
               <Link href={`/tasks?w=${offset + 1}`} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700">→</Link>
@@ -152,7 +153,7 @@ export default async function TasksPage({
                   <span className="text-base font-black text-white leading-none">{totalPct}%</span>
                 </div>
               </div>
-              <div className="mt-1 text-[9px] font-mono text-slate-300 whitespace-nowrap">
+              <div className="mt-1 text-xs font-mono text-slate-300 whitespace-nowrap">
                 <span className="text-cyan-300 font-bold">{sumDone} / {sumTotal}</span> Completed
               </div>
             </div>
@@ -162,7 +163,7 @@ export default async function TasksPage({
         <div className="col-span-12 lg:col-span-5 bg-[#111622] rounded-xl border border-[#1e293b] p-3 flex flex-col justify-between shadow-md">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Mindset Tracker</h2>
-            <div className="flex items-center gap-3 text-[9px]">
+            <div className="flex items-center gap-3 text-xs">
               <span className="flex items-center gap-1 text-red-400"><span className="w-2 h-0.5 bg-red-400 inline-block" /> Energy</span>
               <span className="flex items-center gap-1 text-cyan-400"><span className="w-2 h-0.5 bg-cyan-400 inline-block" /> Focus</span>
               <span className="flex items-center gap-1 text-amber-400"><span className="w-2 h-0.5 bg-amber-400 inline-block" /> Motivation</span>
@@ -183,23 +184,23 @@ export default async function TasksPage({
               <div>
                 <div className={`bg-gradient-to-r ${th.header} text-white text-center py-1.5 px-1 shadow`}>
                   <h3 className="text-xs font-bold uppercase tracking-wider">{d.toLocaleDateString("en-US", { weekday: "long" })}</h3>
-                  <p className="text-[9px] font-mono opacity-80">{slash(d)}</p>
+                  <p className="text-xs font-mono opacity-80">{slash(d)}</p>
                 </div>
                 <Gauge pct={pct} color={th.gauge} label={`${pct}%`} />
-                <div className={`px-2 py-0.5 border-b text-[9px] font-bold text-center tracking-widest uppercase flex items-center justify-between ${th.strip}`}>
+                <div className={`px-2 py-0.5 border-b text-xs font-bold text-center tracking-widest uppercase flex items-center justify-between ${th.strip}`}>
                   <span className="flex-1">Task Checklist</span>
                   <Link href={`/tasks/new?dueDate=${key}`} title="Tambah task hari ini" className="font-bold text-xs leading-none opacity-70 hover:opacity-100">+</Link>
                 </div>
-                <div className="p-1.5 space-y-1 text-[10px] min-h-[120px]">
-                  {list.length === 0 && (
-                    <p className="text-slate-600 text-center py-3">
-                      Kosong. <Link href={`/tasks/new?dueDate=${key}`} className="hover:underline">+ Tambah</Link>
-                    </p>
-                  )}
+                <div className="p-2.5 space-y-1.5 text-sm min-h-[160px]">
+{list.length === 0 && (
+                      <p className="text-slate-500 text-center py-3 text-sm">
+                        Kosong. <Link href={`/tasks/new?dueDate=${key}`} className="hover:underline">+ Tambah</Link>
+                      </p>
+                    )}
                   {list.map((t: any) => {
                     const isDone = t.status === "COMPLETED";
                     return (
-                      <label key={t.id} className={`flex items-start gap-1.5 cursor-pointer ${isDone ? "text-slate-300" : "text-slate-400"} hover:text-white`}>
+                      <label key={t.id} className={`flex items-start gap-2.5 cursor-pointer ${isDone ? "text-slate-300" : "text-slate-400"} hover:text-white`}>
                         <DayTaskCheck taskId={t.id} done={isDone} accent={th.accent} />
                         <Link href={`/tasks/${t.id}/edit`} className={isDone ? "line-through opacity-65 break-words" : "break-words"}>
                           {t.title}
@@ -210,7 +211,7 @@ export default async function TasksPage({
                 </div>
               </div>
               <div>
-                <div className="px-2 py-1 bg-slate-900/60 border-t border-slate-800 text-[9px] flex justify-between text-slate-400">
+                <div className="px-2 py-1 bg-slate-900/60 border-t border-slate-800 text-xs flex justify-between text-slate-400">
                   <span>Completed: <strong className={th.gauge}>{done}</strong></span>
                   <span>Not Completed: <strong className="text-slate-400">{notDone}</strong></span>
                 </div>

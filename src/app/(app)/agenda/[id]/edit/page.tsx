@@ -26,13 +26,26 @@ export default function EditAgendaPage() {
     }).catch(() => {});
   }, [id]);
 
+  function sanitizeForm(f: any) {
+    return {
+      ...f,
+      description: f.description || undefined,
+      category: f.category || undefined,
+      location: f.location || undefined,
+    };
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(""); setLoading(true);
     try {
       const res = await fetch(`/api/agendas/${id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, startTime: new Date(form.startTime).toISOString(), endTime: new Date(form.endTime).toISOString() }),
+        body: JSON.stringify({
+          ...sanitizeForm(form),
+          startTime: new Date(form.startTime).toISOString(),
+          endTime: new Date(form.endTime).toISOString(),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal");

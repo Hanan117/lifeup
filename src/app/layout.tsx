@@ -17,6 +17,11 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "LifeUp — Kelola Hidup dalam Satu Sistem",
   description: "Empat tools yang saling melengkapi: Goal Tracker, Task Tracker, Habit Tracker, Agenda Tracker",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

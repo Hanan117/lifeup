@@ -5,8 +5,6 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import UserPill from "./UserPill";
 
-export type PillarCounts = { tasks: number; habits: number; agendas: number };
-
 const ICONS: Record<string, ReactNode> = {
   goal: (
     <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -54,10 +52,8 @@ const ICONS: Record<string, ReactNode> = {
 
 export default function Sidebar({
   userName,
-  counts,
 }: {
   userName: string;
-  counts: PillarCounts;
 }) {
   const pathname = usePathname();
   const active = pathname === "/dashboard" || pathname === "/"
@@ -76,48 +72,39 @@ export default function Sidebar({
   const accentFor = (key: string) =>
     key === "dashboard" ? "text-cyan-400" : key === "goals" ? "text-indigo-400" : key === "tasks" ? "text-amber-400" : key === "habits" ? "text-emerald-400" : "text-rose-400";
   const pillars = [
-    { key: "dashboard", n: "00", label: "Command Center", sub: "Dashboard", href: "/dashboard", accent: "group-hover:text-cyan-400", badge: null as string | null, activeCls: "bg-cyan-500/15 text-cyan-300 border-cyan-500/20 border-l-4 border-l-cyan-500" },
-    { key: "goals", n: "01", label: "Goal Tracker", sub: "Arah & Visi", href: "/goals", accent: "group-hover:text-indigo-400", badge: null as string | null, activeCls: "bg-indigo-500/15 text-indigo-300 border-indigo-500/20 border-l-4 border-l-indigo-500" },
-    { key: "tasks", n: "02", label: "Task Tracker", sub: "Eksekusi Harian", href: "/tasks", accent: "group-hover:text-amber-400", badge: String(counts.tasks), activeCls: "bg-amber-500/15 text-amber-300 border-amber-500/20 border-l-4 border-l-amber-500" },
-    { key: "habits", n: "03", label: "Habit Tracker", sub: "Konsistensi & Rutinitas", href: "/habits", accent: "group-hover:text-emerald-400", badge: String(counts.habits), activeCls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/20 border-l-4 border-l-emerald-500" },
-    { key: "agenda", n: "04", label: "Agenda Tracker", sub: "Manajemen Waktu", href: "/agenda", accent: "group-hover:text-rose-400", badge: String(counts.agendas), activeCls: "bg-rose-500/15 text-rose-300 border-rose-500/20 border-l-4 border-l-rose-500" },
+    { key: "dashboard", label: "Dashboard", href: "/dashboard", accent: "group-hover:text-cyan-400", activeCls: "bg-cyan-500/15 text-cyan-300 border-cyan-500/20 border-l-4 border-l-cyan-500" },
+    { key: "goals", label: "Goal Tracker", href: "/goals", accent: "group-hover:text-indigo-400", activeCls: "bg-indigo-500/15 text-indigo-300 border-indigo-500/20 border-l-4 border-l-indigo-500" },
+    { key: "tasks", label: "Task Tracker", href: "/tasks", accent: "group-hover:text-amber-400", activeCls: "bg-amber-500/15 text-amber-300 border-amber-500/20 border-l-4 border-l-amber-500" },
+    { key: "habits", label: "Habit Tracker", href: "/habits", accent: "group-hover:text-emerald-400", activeCls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/20 border-l-4 border-l-emerald-500" },
+    { key: "agenda", label: "Agenda Tracker", href: "/agenda", accent: "group-hover:text-rose-400", activeCls: "bg-rose-500/15 text-rose-300 border-rose-500/20 border-l-4 border-l-rose-500" },
   ];
 
   return (
     <aside className="w-[260px] shrink-0 bg-[#0f131c] border-r border-slate-800/80 p-5 hidden md:flex flex-col justify-between h-screen sticky top-0 overflow-y-auto">
       <div className="space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
+        <div className="pb-4 border-b border-slate-800/80">
           <Link href="/dashboard" className="flex items-center gap-1.5">
-            <span className="text-base font-extrabold tracking-tight text-white">
+            <span className="text-lg font-extrabold tracking-tight text-white">
               Life<span className="text-indigo-400">Up</span>
             </span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-400 border border-indigo-500/25 font-bold uppercase">v3.4</span>
           </Link>
-          <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Online</span>
-          </div>
         </div>
 
         <div className="space-y-2">
-          <p className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">4 Pilar Inti</p>
           <nav className="space-y-1">
             {pillars.map((p) => {
               const isActive = active === p.key;
               if (isActive) {
                 return (
-                  <span key={p.key} className={`flex items-center justify-between px-3 py-2.5 rounded-xl border-y border-r shadow-sm ${p.activeCls}`}>
+                  <Link key={p.key} href={p.href} className={`flex items-center justify-between px-3 py-2.5 rounded-xl border-y border-r shadow-sm ${p.activeCls}`}>
                     <span className="flex items-center gap-2.5">
                       <span className={accentFor(p.key)}>
                         {iconFor(p.key)}
                       </span>
-                      <span className="flex flex-col text-left">
-                        <span className="text-xs font-bold text-white">{p.n} {p.label}</span>
-                        <span className="text-[10px] opacity-80">{p.sub}</span>
-                      </span>
+                      <span className="text-xs font-bold text-white">{p.label}</span>
                     </span>
                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 font-bold font-mono">Aktif</span>
-                  </span>
+                  </Link>
                 );
               }
               return (
@@ -126,12 +113,8 @@ export default function Sidebar({
                     <span className={`text-slate-500 ${p.accent} transition`}>
                       {iconFor(p.key)}
                     </span>
-                    <span className="flex flex-col text-left">
-                      <span className="text-xs font-semibold">{p.n} {p.label}</span>
-                      <span className="text-[10px] text-slate-500">{p.sub}</span>
-                    </span>
+                    <span className="text-xs font-semibold">{p.label}</span>
                   </span>
-                  {p.badge && <span className="text-[10px] text-slate-500 font-mono">{p.badge}</span>}
                 </Link>
               );
             })}

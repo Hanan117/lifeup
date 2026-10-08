@@ -32,7 +32,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     where: { id },
     data: {
       title: d.title, description: d.description || null, category: d.category || null,
-      startDate: new Date(d.startDate), targetDate: new Date(d.targetDate), status: d.status,
+      startDate: new Date(d.startDate), targetDate: new Date(d.targetDate), status: d.status, period: d.period,
     },
   });
   return NextResponse.json(goal);

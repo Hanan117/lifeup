@@ -31,6 +31,7 @@ export async function POST(req: Request) {
       startDate: new Date(d.startDate),
       targetDate: new Date(d.targetDate),
       status: d.status,
+      period: d.period,
       userId,
     },
   });

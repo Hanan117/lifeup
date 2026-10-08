@@ -14,11 +14,19 @@ export default function NewHabitPage() {
   const [loading, setLoading] = useState(false);
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
+  function sanitizeForm(f: any) {
+    return {
+      ...f,
+      description: f.description || undefined,
+      goalId: f.goalId || undefined,
+    };
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(""); setLoading(true);
     try {
-      const res = await fetch("/api/habits", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      const res = await fetch("/api/habits", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sanitizeForm(form)) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal");
       router.push("/habits"); router.refresh();

@@ -18,6 +18,7 @@ export const goalSchema = z.object({
   startDate: z.string().min(1, "Tanggal mulai wajib diisi"),
   targetDate: z.string().min(1, "Tanggal target wajib diisi"),
   status: z.enum(["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "ARCHIVED"]).default("NOT_STARTED"),
+  period: z.enum(["YEARLY", "MONTHLY"]).default("YEARLY"),
 });
 
 export const taskSchema = z.object({

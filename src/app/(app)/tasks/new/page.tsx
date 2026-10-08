@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -8,22 +8,28 @@ import { Suspense } from "react";
 function Form() {
   const router = useRouter();
   const sp = useSearchParams();
-  const [goals, setGoals] = useState<any[]>([]);
   const [form, setForm] = useState({ title: "", description: "", priority: "MEDIUM", dueDate: sp.get("dueDate") ?? "", goalId: sp.get("goalId") ?? "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
-  useEffect(() => { fetch("/api/goals").then((r) => r.json()).then(setGoals).catch(() => {}); }, []);
+  function sanitizeForm(f: any) {
+    return {
+      ...f,
+      dueDate: f.dueDate || undefined,
+      goalId: f.goalId || undefined,
+      description: f.description || undefined,
+    };
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(""); setLoading(true);
     try {
-      const res = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      const res = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sanitizeForm(form)) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal");
-      router.push("/tasks"); router.refresh();
+      router.push(form.goalId ? "/goals" : "/tasks"); router.refresh();
     } catch (err) { setError(err instanceof Error ? err.message : "Gagal"); }
     finally { setLoading(false); }
   }
@@ -41,11 +47,6 @@ function Form() {
           </select></div>
         <div><label className="text-sm text-zinc-400">Tenggat</label><input type="date" value={form.dueDate} onChange={(e) => set("dueDate", e.target.value)} className={input} /></div>
       </div>
-      <div><label className="text-sm text-zinc-400">Goal terkait (opsional)</label>
-        <select value={form.goalId} onChange={(e) => set("goalId", e.target.value)} className={input}>
-          <option value="">— Tanpa goal —</option>
-          {goals.map((g: any) => <option key={g.id} value={g.id}>{g.title}</option>)}
-        </select></div>
       {error && <p className="text-sm text-red-400">{error}</p>}
       <div className="flex gap-2">
         <button disabled={loading} className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold disabled:opacity-60">{loading ? "..." : "Simpan"}</button>

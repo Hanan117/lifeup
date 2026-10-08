@@ -1,35 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function EditTaskPage() {
+function Form() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [goals, setGoals] = useState<any[]>([]);
+  const sp = useSearchParams();
+  const backHref = sp.get("from") === "/goals" ? "/goals" : "/tasks";
   const [form, setForm] = useState<any>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const set = (k: string, v: string) => setForm((f: any) => ({ ...f, [k]: v }));
 
   useEffect(() => {
-    fetch("/api/goals").then((r) => r.json()).then(setGoals).catch(() => {});
     fetch(`/api/tasks/${id}`).then(async (r) => {
       if (!r.ok) return;
       const d = await r.json();
-      setForm({ ...d, dueDate: d.dueDate?.slice(0, 10) ?? "", goalId: d.goalId ?? "" });
+      setForm({
+        ...d,
+        description: d.description ?? "",
+        dueDate: d.dueDate?.slice(0, 10) ?? "",
+        goalId: d.goalId ?? "",
+        priority: d.priority ?? "MEDIUM",
+        status: d.status ?? "TODO",
+      });
     }).catch(() => {});
   }, [id]);
+
+  function sanitizeForm(f: any) {
+    return {
+      ...f,
+      dueDate: f.dueDate || undefined,
+      goalId: f.goalId || undefined,
+    };
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(""); setLoading(true);
     try {
-      const res = await fetch(`/api/tasks/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      const res = await fetch(`/api/tasks/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sanitizeForm(form)) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal");
-      router.push("/tasks"); router.refresh();
+      router.push(backHref); router.refresh();
     } catch (err) { setError(err instanceof Error ? err.message : "Gagal"); }
     finally { setLoading(false); }
   }
@@ -61,18 +76,21 @@ export default function EditTaskPage() {
             </select></div>
         </div>
         <div><label className="text-sm text-zinc-400">Tenggat</label><input type="date" value={form.dueDate} onChange={(e) => set("dueDate", e.target.value)} className={input} /></div>
-        <div><label className="text-sm text-zinc-400">Goal</label>
-          <select value={form.goalId} onChange={(e) => set("goalId", e.target.value)} className={input}>
-            <option value="">— Tanpa goal —</option>
-            {goals.map((g: any) => <option key={g.id} value={g.id}>{g.title}</option>)}
-          </select></div>
         {error && <p className="text-sm text-red-400">{error}</p>}
         <div className="flex gap-2">
           <button disabled={loading} className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold disabled:opacity-60">{loading ? "..." : "Simpan"}</button>
-          <Link href="/tasks" className="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 text-sm">Batal</Link>
+          <Link href={backHref} className="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 text-sm">Batal</Link>
           <button type="button" onClick={remove} className="ml-auto px-4 py-2 rounded-xl bg-red-950 text-red-300 text-sm">Hapus</button>
         </div>
       </form>
     </div>
+  );
+}
+
+export default function EditTaskPage() {
+  return (
+    <Suspense>
+      <Form />
+    </Suspense>
   );
 }

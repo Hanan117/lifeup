@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import GoalActions from "./GoalActions";
+import TaskDeleteButton from "@/components/TaskDeleteButton";
 
 export default async function GoalDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const userId = await getSessionUserId();
@@ -37,9 +38,12 @@ export default async function GoalDetailPage({ params }: { params: Promise<{ id:
         </div>
         <ul className="space-y-2 text-sm">
           {goal.tasks.map((t: any) => (
-            <li key={t.id} className="flex justify-between text-zinc-300">
+            <li key={t.id} className="flex justify-between items-center gap-2 text-zinc-300">
               <span className={t.status === "COMPLETED" ? "line-through opacity-60" : ""}>{t.title}</span>
-              <span className="text-zinc-500 text-xs">{t.status}</span>
+              <span className="flex items-center gap-2 shrink-0">
+                <span className="text-zinc-500 text-xs">{t.status}</span>
+                <TaskDeleteButton taskId={t.id} title={t.title} />
+              </span>
             </li>
           ))}
           {goal.tasks.length === 0 && <li className="text-zinc-500">Belum ada task untuk goal ini.</li>}

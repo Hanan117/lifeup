@@ -17,17 +17,28 @@ export default function EditGoalPage() {
       const d = await r.json();
       setForm({
         ...d,
+        description: d.description ?? "",
+        category: d.category ?? "",
+        period: d.period ?? "YEARLY",
         startDate: d.startDate?.slice(0, 10),
         targetDate: d.targetDate?.slice(0, 10),
       });
     });
   }, [id]);
 
+  function sanitizeForm(f: any) {
+    return {
+      ...f,
+      description: f.description || undefined,
+      category: f.category || undefined,
+    };
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(""); setLoading(true);
     try {
-      const res = await fetch(`/api/goals/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      const res = await fetch(`/api/goals/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sanitizeForm(form)) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal");
       router.push(`/goals/${id}`); router.refresh();
@@ -53,6 +64,15 @@ export default function EditGoalPage() {
           <div><label className="text-sm text-zinc-400">Mulai</label><input type="date" required value={form.startDate} onChange={(e) => set("startDate", e.target.value)} className={input} /></div>
           <div><label className="text-sm text-zinc-400">Target</label><input type="date" required value={form.targetDate} onChange={(e) => set("targetDate", e.target.value)} className={input} /></div>
         </div>
+        <div><label className="text-sm text-zinc-400">Periode</label>
+          <div className="mt-1 flex items-center gap-1 bg-zinc-950 p-1 rounded-lg border border-zinc-800 text-sm font-semibold w-fit">
+            {(["YEARLY", "MONTHLY"] as const).map((p) => (
+              <button key={p} type="button" onClick={() => set("period", p)}
+                className={`px-3 py-1.5 rounded-md transition ${form.period === p ? "bg-indigo-600 text-white shadow-sm" : "text-zinc-400 hover:text-white"}`}>
+                {p === "YEARLY" ? "Tahunan" : "Bulanan"}
+              </button>
+            ))}
+          </div></div>
         {error && <p className="text-sm text-red-400">{error}</p>}
         <div className="flex gap-2">
           <button disabled={loading} className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold disabled:opacity-60">{loading ? "..." : "Simpan"}</button>

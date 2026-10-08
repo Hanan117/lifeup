@@ -9,14 +9,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!userId) redirect("/login");
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) redirect("/login");
-  const [tasks, habits, agendas] = await Promise.all([
-    db.task.count({ where: { userId, status: { not: "COMPLETED" } } }),
-    db.habit.count({ where: { userId } }),
-    db.agenda.count({ where: { userId } }),
-  ]);
   return (
     <div className="min-h-screen bg-[#0a0e17] text-zinc-100 flex">
-      <Sidebar userName={user.name} counts={{ tasks, habits, agendas }} />
+      <Sidebar userName={user.name} />
       <div className="flex-1 min-w-0">
         <nav className="md:hidden flex items-center gap-4 px-4 py-3 border-b border-slate-800 bg-[#0f131c] sticky top-0 z-10 text-sm overflow-x-auto">
           <a href="/dashboard" className="text-white font-bold">LifeUp</a>

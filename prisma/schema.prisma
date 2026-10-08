@@ -34,6 +34,7 @@ model Goal {
   targetDate  DateTime
   progress    Int        @default(0)
   status      GoalStatus @default(NOT_STARTED)
+  period      GoalPeriod @default(YEARLY)
   userId      String
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   tasks       Task[]
@@ -101,6 +102,11 @@ model Agenda {
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+}
+
+enum GoalPeriod {
+  YEARLY
+  MONTHLY
 }
 
 enum GoalStatus {

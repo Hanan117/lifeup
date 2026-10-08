@@ -18,7 +18,7 @@ export function SearchTrigger() {
       className="flex-1 min-w-[180px] flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm text-zinc-500 hover:border-white/25 hover:text-zinc-300 transition text-left"
     >
       <span>⌕</span>
-      <span className="truncate">Command or search vector…</span>
+      <span className="truncate">Cari atau perintah…</span>
       <kbd className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-zinc-400">⌘K</kbd>
     </button>
   );
