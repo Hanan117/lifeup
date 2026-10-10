@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense, type ReactNode } from "react";
 import UserPill from "./UserPill";
 
 const ICONS: Record<string, ReactNode> = {
@@ -50,23 +50,32 @@ const ICONS: Record<string, ReactNode> = {
   ),
 };
 
-export default function Sidebar({
+function SidebarInner({
   userName,
 }: {
   userName: string;
 }) {
   const pathname = usePathname();
+  const sp = useSearchParams();
+  // Kalau edit/buat task dibuka dari Goal Tracker (?from=/goals atau ?goalId=),
+  // sidebar tetap sorot Goal Tracker biar tidak terasa "kabur".
+  const fromGoals =
+    sp.get("from") === "/goals" || sp.get("goalId") !== null;
+  const inGoalTaskFlow =
+    (pathname.startsWith("/tasks/") || pathname === "/tasks/new") && fromGoals;
   const active = pathname === "/dashboard" || pathname === "/"
     ? "dashboard"
-    : pathname.startsWith("/tasks")
-      ? "tasks"
-      : pathname.startsWith("/habits")
-        ? "habits"
-        : pathname.startsWith("/agenda")
-          ? "agenda"
-          : pathname.startsWith("/goals")
-            ? "goals"
-            : "dashboard";
+    : inGoalTaskFlow
+      ? "goals"
+      : pathname.startsWith("/tasks")
+        ? "tasks"
+        : pathname.startsWith("/habits")
+          ? "habits"
+          : pathname.startsWith("/agenda")
+            ? "agenda"
+            : pathname.startsWith("/goals")
+              ? "goals"
+              : "dashboard";
   const iconFor = (key: string) =>
     key === "dashboard" ? ICONS.command : key === "goals" ? ICONS.goal : key === "tasks" ? ICONS.task : key === "habits" ? ICONS.habit : ICONS.agenda;
   const accentFor = (key: string) =>
@@ -144,5 +153,17 @@ export default function Sidebar({
         <UserPill userName={userName} />
       </div>
     </aside>
+  );
+}
+
+export default function Sidebar({
+  userName,
+}: {
+  userName: string;
+}) {
+  return (
+    <Suspense>
+      <SidebarInner userName={userName} />
+    </Suspense>
   );
 }

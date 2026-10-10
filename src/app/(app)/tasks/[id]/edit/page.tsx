@@ -52,7 +52,7 @@ function Form() {
   async function remove() {
     if (!confirm("Hapus task ini?")) return;
     await fetch(`/api/tasks/${id}`, { method: "DELETE" });
-    router.push("/tasks"); router.refresh();
+    router.push(backHref); router.refresh();
   }
 
   if (!form) return <p className="text-zinc-500 text-sm">Memuat...</p>;

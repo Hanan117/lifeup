@@ -3,8 +3,6 @@ import { getSessionUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import DayTaskCheck from "@/components/DayTaskCheck";
-import MindsetCheckIn from "@/components/MindsetCheckIn";
-import MindsetWave from "@/components/MindsetWave";
 
 type DayTheme = {
   header: string;
@@ -59,17 +57,19 @@ export default async function TasksPage({
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const end = new Date(today);
-  end.setDate(end.getDate() + offset * 7);
+  // Minggu selalu Senin -> Minggu (ISO): 0=Senin ... 6=Minggu
+  const dowMon0 = (today.getDay() + 6) % 7;
+  const monday = new Date(today);
+  monday.setDate(monday.getDate() - dowMon0 + offset * 7);
   const days: Date[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(end);
-    d.setDate(d.getDate() - i);
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(d.getDate() + i);
     days.push(d);
   }
   const start = days[0];
-  const windowEnd = new Date(end);
-  windowEnd.setDate(windowEnd.getDate() + 1);
+  const windowEnd = new Date(monday);
+  windowEnd.setDate(windowEnd.getDate() + 7);
 
   const all = await db.task.findMany({
     where: {
@@ -114,19 +114,18 @@ export default async function TasksPage({
               <span className="text-xs font-mono font-bold text-cyan-200">{slash(start)}</span>
             </div>
           </div>
-          <div className="text-xs text-slate-400 flex items-center justify-between pt-1">
-            <span>{sumTotal} tugas • {offset === 0 ? "minggu ini" : offset < 0 ? `${-offset} minggu lalu` : `${offset} minggu depan`}</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          </div>
         </div>
 
-        <div className="col-span-12 lg:col-span-5 bg-[#111622] rounded-xl border border-[#1e293b] p-3 flex flex-col justify-between shadow-md">
+        <div className="col-span-12 lg:col-span-10 bg-[#111622] rounded-xl border border-[#1e293b] p-3 flex flex-col justify-between shadow-md">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Overall Progress</h2>
-            <span className="flex items-center gap-1 text-xs">
-              <Link href={`/tasks?w=${offset - 1}`} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700">←</Link>
-              <span className="text-slate-400 font-mono">Week Completion</span>
-              <Link href={`/tasks?w=${offset + 1}`} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700">→</Link>
+            <span className="flex items-center gap-1.5 text-xs mr-4 pr-1">
+              <Link href={`/tasks?w=${offset - 1}`} title="Minggu lalu" aria-label="Minggu lalu" className="p-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-cyan-500/20 hover:border-cyan-500/50 hover:text-cyan-300 transition">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+              </Link>
+              <Link href={`/tasks?w=${offset + 1}`} title="Minggu depan" aria-label="Minggu depan" className="p-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-cyan-500/20 hover:border-cyan-500/50 hover:text-cyan-300 transition">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+              </Link>
               {offset !== 0 && <Link href="/tasks" className="text-cyan-400 hover:underline ml-1">kini</Link>}
             </span>
           </div>
@@ -160,27 +159,15 @@ export default async function TasksPage({
           </div>
         </div>
 
-        <div className="col-span-12 lg:col-span-5 bg-[#111622] rounded-xl border border-[#1e293b] p-3 flex flex-col justify-between shadow-md">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Mindset Tracker</h2>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1 text-red-400"><span className="w-2 h-0.5 bg-red-400 inline-block" /> Energy</span>
-              <span className="flex items-center gap-1 text-cyan-400"><span className="w-2 h-0.5 bg-cyan-400 inline-block" /> Focus</span>
-              <span className="flex items-center gap-1 text-amber-400"><span className="w-2 h-0.5 bg-amber-400 inline-block" /> Motivation</span>
-            </div>
-          </div>
-          <MindsetWave days={days.map((d) => ({ key: dayKey(d), label: d.toLocaleDateString("en-US", { weekday: "short" }) }))} />
-        </div>
       </section>
 
       {/* 7 kolom hari */}
       <section className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
-        {perDay.map(({ d, list, done, total, pct }, i) => {
+        {perDay.map(({ d, list, pct }, i) => {
           const th = DAY_THEMES[i % DAY_THEMES.length];
           const key = dayKey(d);
-          const notDone = total - done;
           return (
-            <article key={key} className={`bg-[#111622] rounded-xl border border-slate-800 flex flex-col justify-between overflow-hidden shadow-sm ${th.hover} transition`}>
+            <article key={key} className={`bg-[#111622] rounded-xl border border-slate-800 flex flex-col overflow-hidden shadow-sm ${th.hover} transition`}>
               <div>
                 <div className={`bg-gradient-to-r ${th.header} text-white text-center py-1.5 px-1 shadow`}>
                   <h3 className="text-xs font-bold uppercase tracking-wider">{d.toLocaleDateString("en-US", { weekday: "long" })}</h3>
@@ -192,11 +179,6 @@ export default async function TasksPage({
                   <Link href={`/tasks/new?dueDate=${key}`} title="Tambah task hari ini" className="font-bold text-xs leading-none opacity-70 hover:opacity-100">+</Link>
                 </div>
                 <div className="p-2.5 space-y-1.5 text-sm min-h-[160px]">
-{list.length === 0 && (
-                      <p className="text-slate-500 text-center py-3 text-sm">
-                        Kosong. <Link href={`/tasks/new?dueDate=${key}`} className="hover:underline">+ Tambah</Link>
-                      </p>
-                    )}
                   {list.map((t: any) => {
                     const isDone = t.status === "COMPLETED";
                     return (
@@ -208,15 +190,6 @@ export default async function TasksPage({
                       </label>
                     );
                   })}
-                </div>
-              </div>
-              <div>
-                <div className="px-2 py-1 bg-slate-900/60 border-t border-slate-800 text-xs flex justify-between text-slate-400">
-                  <span>Completed: <strong className={th.gauge}>{done}</strong></span>
-                  <span>Not Completed: <strong className="text-slate-400">{notDone}</strong></span>
-                </div>
-                <div className="bg-black/40 p-1.5 border-t border-slate-800/60">
-                  <MindsetCheckIn dateKey={key} accent={th.gauge} />
                 </div>
               </div>
             </article>
