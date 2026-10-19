@@ -18,21 +18,11 @@ export function SearchTrigger() {
       className="flex-1 min-w-[180px] flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm text-zinc-500 hover:border-white/25 hover:text-zinc-300 transition text-left"
     >
       <span>⌕</span>
-      <span className="truncate">Cari atau perintah…</span>
+      <span className="truncate">Cari goal, task, habit, agenda…</span>
       <kbd className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-zinc-400">⌘K</kbd>
     </button>
   );
 }
-
-const QUICK_LINKS = [
-  { title: "Go: Dashboard", href: "/dashboard" },
-  { title: "Go: Goals", href: "/goals" },
-  { title: "+ Goal baru", href: "/goals/new" },
-  { title: "Go: Tasks", href: "/tasks" },
-  { title: "+ Task baru", href: "/tasks/new" },
-  { title: "Go: Habits", href: "/habits" },
-  { title: "Go: Agenda", href: "/agenda" },
-];
 
 export default function CommandPalette() {
   const router = useRouter();
@@ -98,10 +88,6 @@ export default function CommandPalette() {
       ]
     : [];
 
-  const quickFiltered = q.trim()
-    ? QUICK_LINKS.filter((l) => l.title.toLowerCase().includes(q.trim().toLowerCase()))
-    : QUICK_LINKS;
-
   const go = useCallback(
     (href: string) => {
       setOpen(false);
@@ -114,7 +100,7 @@ export default function CommandPalette() {
   const taskItems = (groups?.tasks ?? []).map((i) => ({ ...i, kind: "Tasks" }));
   const habitItems = (groups?.habits ?? []).map((i) => ({ ...i, kind: "Habits" }));
   const agendaItems = (groups?.agendas ?? []).map((i) => ({ ...i, kind: "Agenda" }));
-  const totalRows = flat.length + quickFiltered.length;
+  const totalRows = flat.length;
 
   if (!open) return null;
 
@@ -157,11 +143,7 @@ export default function CommandPalette() {
               if (e.key === "ArrowUp") { e.preventDefault(); setActiveIdx((v) => Math.max(0, v - 1)); }
               if (e.key === "Enter") {
                 e.preventDefault();
-                if (activeIdx < flat.length) go(flat[activeIdx].href);
-                else {
-                  const qi = activeIdx - flat.length;
-                  if (quickFiltered[qi]) go(quickFiltered[qi].href);
-                }
+                if (flat[activeIdx]) go(flat[activeIdx].href);
               }
             }}
             placeholder="Cari goal, task, habit, agenda…"
@@ -171,6 +153,9 @@ export default function CommandPalette() {
           <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-zinc-400">ESC</kbd>
         </div>
         <div className="max-h-[50vh] overflow-y-auto pb-2">
+          {q.trim().length < 2 && (
+            <p className="px-4 py-3 text-sm text-zinc-500">Ketik min. 2 huruf untuk mencari goal, task, habit, atau agenda…</p>
+          )}
           {q.trim().length >= 2 && !loading && flat.length === 0 && (
             <p className="px-4 py-3 text-sm text-zinc-500">Tidak ada hasil untuk &ldquo;{q.trim()}&rdquo;.</p>
           )}
@@ -182,21 +167,6 @@ export default function CommandPalette() {
               {renderGroup("Agenda", agendaItems, goalItems.length + taskItems.length + habitItems.length)}
             </>
           )}
-          <p className="px-3 pt-2 pb-1 text-[10px] font-bold tracking-widest text-zinc-500">AKSI CEPAT</p>
-          {quickFiltered.map((l, i) => {
-            const idx = flat.length + i;
-            return (
-              <button
-                key={l.title}
-                type="button"
-                onMouseEnter={() => setActiveIdx(idx)}
-                onClick={() => go(l.href)}
-                className={`w-full px-3 py-2 text-sm text-left ${idx === activeIdx ? "bg-indigo-500/20 text-white" : "text-zinc-300"}`}
-              >
-                {l.title}
-              </button>
-            );
-          })}
         </div>
       </div>
     </div>

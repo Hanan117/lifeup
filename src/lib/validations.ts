@@ -34,6 +34,8 @@ export const habitSchema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter").max(200),
   description: z.string().max(2000).optional(),
   color: z.string().default("#8B5CF6"),
+  frequency: z.enum(["DAILY", "WEEKLY", "CUSTOM"]).default("DAILY"),
+  target: z.number().int().positive().default(1),
   goalId: z.string().optional(),
   startDate: z.string().min(1, "Tanggal mulai wajib diisi"),
 });

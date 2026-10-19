@@ -3,19 +3,12 @@ import { getSessionUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { SearchTrigger } from "@/components/CommandPalette";
+import NewEntryMenu from "@/components/NewEntryMenu";
+import UserMenu from "@/components/UserMenu";
 
 function pct(done: number, total: number) {
   if (!total) return 0;
   return Math.min(100, Math.round((done / total) * 100));
-}
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 }
 
 export default async function DashboardPage() {
@@ -80,9 +73,10 @@ export default async function DashboardPage() {
       {/* ── Topbar ala mockup ── */}
       <div className="flex items-center gap-3 flex-wrap">
         <SearchTrigger />
-        <Link href="/tasks/new" className="px-4 py-1.5 rounded-lg bg-indigo-200 text-indigo-950 text-sm font-bold hover:bg-indigo-100 transition">+ New Entry</Link>
-        <Link href="/agenda" aria-label="Agenda" className="w-9 h-9 grid place-items-center rounded-lg bg-white/5 border border-white/10 text-zinc-300 hover:text-white">◫</Link>
-        <span className="w-9 h-9 grid place-items-center rounded-full bg-indigo-200 text-indigo-950 text-sm font-bold">{initials(user.name)}</span>
+        <NewEntryMenu />
+        <div className="md:hidden">
+          <UserMenu userName={user.name} userEmail={user.email} align="right" position="down" />
+        </div>
       </div>
 
       {/* ── Hero ── */}
@@ -153,7 +147,6 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h2 className="font-bold text-white">● Arah &amp; Visi Target</h2>
-                <p className="text-xs text-zinc-500 mt-0.5">Milestone Strategis Q1-Q2 2026</p>
               </div>
               <span className="text-[10px] font-mono px-2 py-1 rounded bg-white/5 border border-white/10 text-zinc-400">{goals.length} FOKUS</span>
             </div>

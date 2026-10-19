@@ -10,6 +10,7 @@ function Form() {
   const sp = useSearchParams();
   const backHref = sp.get("from") === "/goals" ? "/goals" : "/tasks";
   const [form, setForm] = useState<any>(null);
+  const [goals, setGoals] = useState<{ id: string; title: string }[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const set = (k: string, v: string) => setForm((f: any) => ({ ...f, [k]: v }));
@@ -29,6 +30,13 @@ function Form() {
     }).catch(() => {});
   }, [id]);
 
+  useEffect(() => {
+    fetch("/api/goals").then(async (r) => {
+      if (!r.ok) return;
+      const d = await r.json();
+      if (Array.isArray(d)) setGoals(d.map((g: any) => ({ id: g.id, title: g.title })));
+    }).catch(() => {});
+  }, []);
   function sanitizeForm(f: any) {
     return {
       ...f,
@@ -76,6 +84,11 @@ function Form() {
             </select></div>
         </div>
         <div><label className="text-sm text-zinc-400">Tenggat</label><input type="date" value={form.dueDate} onChange={(e) => set("dueDate", e.target.value)} className={input} /></div>
+        <div><label className="text-sm text-zinc-400">Milik Goal? (opsional)</label>
+          <select value={form.goalId ?? ""} onChange={(e) => set("goalId", e.target.value)} className={input}>
+            <option value="">-- Tanpa goal --</option>
+            {goals.map((g) => <option key={g.id} value={g.id}>🎯 {g.title}</option>)}
+          </select></div>
         {error && <p className="text-sm text-red-400">{error}</p>}
         <div className="flex gap-2">
           <button disabled={loading} className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold disabled:opacity-60">{loading ? "..." : "Simpan"}</button>

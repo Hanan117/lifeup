@@ -74,9 +74,9 @@ export default async function TasksPage({
   const all = await db.task.findMany({
     where: {
       userId,
-      goalId: null,
       OR: [{ dueDate: null }, { dueDate: { gte: start, lt: windowEnd } }],
     },
+    include: { goal: { select: { id: true, title: true } } },
     orderBy: { createdAt: "asc" },
   });
 
@@ -184,9 +184,16 @@ export default async function TasksPage({
                     return (
                       <label key={t.id} className={`flex items-start gap-2.5 cursor-pointer ${isDone ? "text-slate-300" : "text-slate-400"} hover:text-white`}>
                         <DayTaskCheck taskId={t.id} done={isDone} accent={th.accent} />
-                        <Link href={`/tasks/${t.id}/edit`} className={isDone ? "line-through opacity-65 break-words" : "break-words"}>
-                          {t.title}
-                        </Link>
+                        <span className="min-w-0 flex-1">
+                          <Link href={`/tasks/${t.id}/edit`} className={isDone ? "line-through opacity-65 break-words" : "break-words"}>
+                            {t.title}
+                          </Link>
+                          {t.goal && (
+                            <Link href={`/goals/${t.goal.id}`} title={`Lihat goal: ${t.goal.title}`} className="mt-0.5 inline-block max-w-full truncate rounded border border-white/10 bg-white/5 px-1.5 py-px text-[10px] font-medium text-slate-300 hover:text-white hover:border-white/25">
+                              🎯 {t.goal.title}
+                            </Link>
+                          )}
+                        </span>
                       </label>
                     );
                   })}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -9,6 +9,14 @@ function Form() {
   const router = useRouter();
   const sp = useSearchParams();
   const [form, setForm] = useState({ title: "", description: "", priority: "MEDIUM", dueDate: sp.get("dueDate") ?? "", goalId: sp.get("goalId") ?? "" });
+  const [goals, setGoals] = useState<{ id: string; title: string }[]>([]);
+  useEffect(() => {
+    fetch("/api/goals").then(async (r) => {
+      if (!r.ok) return;
+      const d = await r.json();
+      if (Array.isArray(d)) setGoals(d.map((g: any) => ({ id: g.id, title: g.title })));
+    }).catch(() => {});
+  }, []);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -38,6 +46,11 @@ function Form() {
   return (
     <form onSubmit={submit} className="rounded-xl bg-zinc-900 border border-zinc-800 p-5 space-y-3">
       <div><label className="text-sm text-zinc-400">Judul</label><input required value={form.title} onChange={(e) => set("title", e.target.value)} className={input} /></div>
+      <div><label className="text-sm text-zinc-400">Milik Goal? (opsional)</label>
+        <select value={form.goalId} onChange={(e) => set("goalId", e.target.value)} className={input}>
+          <option value="">-- Tanpa goal --</option>
+          {goals.map((g) => <option key={g.id} value={g.id}>🎯 {g.title}</option>)}
+        </select></div>
       <div><label className="text-sm text-zinc-400">Deskripsi</label><textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} className={input} /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><label className="text-sm text-zinc-400">Prioritas</label>

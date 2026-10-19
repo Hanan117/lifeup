@@ -99,12 +99,6 @@ export default async function HabitsPage({
     dailyPct.push(Math.round((c / habits.length) * 100));
   }
 
-  const monthDone = habits.reduce((a: number, h: any) => a + h.logs.length, 0);
-  const slots = habits.length * dim;
-  const counted = dailyPct.filter((_, i) => i < elapsed);
-  const peak = counted.length ? Math.max(...counted) : 0;
-  const min = counted.length ? Math.min(...counted) : 0;
-
   const perHabit = habits.map((h: any) => {
     const done = h.logs.length;
     const pct = elapsed ? Math.round((done / elapsed) * 100) : 0;
@@ -135,20 +129,6 @@ export default async function HabitsPage({
 
   return (
     <div className="space-y-4 text-slate-200">
-      {/* Toolbar */}
-      <div className="flex items-center justify-end">
-        <div className="flex items-center space-x-2">
-          <Link href="/habits/new" className="text-[11px] font-semibold px-3 py-1 rounded-lg bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/25 transition">+ Habit</Link>
-          <div className="flex items-center rounded-md bg-[#121824] p-0.5 border border-[#222e44]">
-            <Link href={`/habits?m=${prev}`} className="px-2 py-0.5 text-slate-400 hover:text-white text-xs">←</Link>
-            <Link href="/habits" title="Kembali ke bulan berjalan" className="text-[11px] font-mono px-3 py-1 rounded-lg bg-[#121824] border border-[#222e44] text-cyan-400 font-semibold">
-              {monthName} {y}
-            </Link>
-            <Link href={`/habits?m=${next}`} className="px-2 py-0.5 text-slate-400 hover:text-white text-xs">→</Link>
-          </div>
-        </div>
-      </div>
-
       {/* Top telemetry */}
       <section className="grid grid-cols-12 gap-3.5">
         <div className="col-span-12 lg:col-span-3 flex flex-col gap-2.5">
@@ -169,12 +149,21 @@ export default async function HabitsPage({
         </div>
 
         <div className="col-span-12 lg:col-span-9 bg-[#0f1724] border border-[#1d2a3f] rounded-xl p-3 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
             <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-300 font-bold flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
               Consistency Graph
             </span>
-            <span className="text-[10px] font-mono text-slate-400">Peak: {peak}% • Min: {min}% • {monthDone}/{slots}</span>
+            <span className="flex items-center space-x-2">
+              <Link href="/habits/new" className="text-[11px] font-semibold px-3 py-1 rounded-lg bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/25 transition">+ Habit</Link>
+              <span className="flex items-center rounded-md bg-[#121824] p-0.5 border border-[#222e44]">
+                <Link href={`/habits?m=${prev}`} title="Bulan lalu" className="px-2 py-0.5 text-slate-400 hover:text-white text-xs">←</Link>
+                <Link href="/habits" title="Kembali ke bulan berjalan" className="text-[11px] font-mono px-3 py-1 rounded-lg bg-[#121824] border border-[#222e44] text-cyan-400 font-semibold">
+                  {monthName} {y}
+                </Link>
+                <Link href={`/habits?m=${next}`} title="Bulan depan" className="px-2 py-0.5 text-slate-400 hover:text-white text-xs">→</Link>
+              </span>
+            </span>
           </div>
           <div className="relative w-full h-28 bg-[#0a0f18] rounded-lg border border-[#1a2335] overflow-hidden">
             <svg className="w-full h-full" preserveAspectRatio="none" viewBox={`0 0 ${W} ${H}`}>
@@ -233,8 +222,10 @@ export default async function HabitsPage({
                   {habits.map((h: any) => (
                     <tr key={h.id} className="hover:bg-[#141b2b] transition-colors">
                       <td className="py-2 px-1.5 text-slate-500 text-xs">{h.frequency === "DAILY" ? "HARIAN" : h.frequency === "WEEKLY" ? "MINGGUAN" : "CUSTOM"}</td>
-                      <td className="py-2 px-3 font-sans font-medium text-sm text-slate-200 border-r border-[#1c273c] truncate max-w-[340px]" title={h.name}>
-                        {h.name}
+                      <td className="py-2 px-3 font-sans font-medium text-sm text-slate-200 border-r border-[#1c273c] max-w-[340px]" title={h.name}>
+                        <Link href={`/habits/${h.id}`} className="flex items-center gap-1 min-w-0">
+                          <span className="truncate flex-1 min-w-0 text-cyan-300 hover:underline cursor-pointer">{h.name}</span>
+                        </Link>
                       </td>
                       {weekChunks.map((daysArr, wi) => {
                         const wk = WEEKS[wi % WEEKS.length];

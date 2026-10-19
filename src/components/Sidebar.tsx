@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
-import UserPill from "./UserPill";
+import UserMenu from "./UserMenu";
 
 const ICONS: Record<string, ReactNode> = {
   goal: (
@@ -48,12 +48,19 @@ const ICONS: Record<string, ReactNode> = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   ),
+  focus: (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
 };
 
 function SidebarInner({
   userName,
+  userEmail,
 }: {
   userName: string;
+  userEmail?: string;
 }) {
   const pathname = usePathname();
   const sp = useSearchParams();
@@ -133,6 +140,10 @@ function SidebarInner({
         <div className="space-y-2 pt-2 border-t border-slate-800/60">
           <p className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kontrol &amp; Pengaturan</p>
           <nav className="space-y-1">
+            <Link href="/fokus" className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition ${pathname.startsWith("/fokus") ? "text-orange-300 bg-orange-500/15" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"}`}>
+              <span className={pathname.startsWith("/fokus") ? "text-orange-400" : "text-slate-500"}>{ICONS.focus}</span>
+              <span>Focus Pomodoro</span>
+            </Link>
             <Link href="/dashboard" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 transition">
               <span className="text-slate-500">{ICONS.analytics}</span>
               <span>Analytics &amp; Capaian</span>
@@ -150,7 +161,7 @@ function SidebarInner({
       </div>
 
       <div className="pt-4 border-t border-slate-800/80">
-        <UserPill userName={userName} />
+        <UserMenu userName={userName} userEmail={userEmail} align="left" position="up" variant="card" />
       </div>
     </aside>
   );
@@ -158,12 +169,14 @@ function SidebarInner({
 
 export default function Sidebar({
   userName,
+  userEmail,
 }: {
   userName: string;
+  userEmail?: string;
 }) {
   return (
     <Suspense>
-      <SidebarInner userName={userName} />
+      <SidebarInner userName={userName} userEmail={userEmail} />
     </Suspense>
   );
 }
