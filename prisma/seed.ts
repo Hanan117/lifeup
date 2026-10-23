@@ -10,7 +10,7 @@ async function main() {
       name: "Demo User",
       email,
       // bcrypt hash dari "password123" — diganti auth asli di Fase 2.
-      passwordHash: "$2b$10$wHqybJvRuLo1LQZ8KqQY6u6Y6Y6Y6Y6Y6Y6Y6Y6Y6Y6Y6Y6Y6Y6Y6",
+      passwordHash: "$2b$10$L4hpRzALTYaDBmmBojSVoe69/mt.Qd6HtKgCzNjAQPvpn1.uXaaWe",
     },
   });
 

@@ -48,3 +48,12 @@ export const agendaSchema = z.object({
   category: z.string().max(50).optional(),
   location: z.string().max(200).optional(),
 });
+
+export const profileSchema = z.object({
+  name: z.string().min(2, "Nama minimal 2 karakter").max(100),
+});
+
+export const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Kata sandi lama wajib diisi"),
+  newPassword: z.string().min(8, "Password minimal 8 karakter").max(100),
+});

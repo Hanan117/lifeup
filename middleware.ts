@@ -7,7 +7,7 @@ const secret = new TextEncoder().encode(
 );
 
 const PROTECTED = ["/dashboard", "/goals", "/tasks", "/habits", "/agenda", "/fokus", "/settings"];
-const GUEST_ONLY = ["/login", "/register"];
+const GUEST_ONLY = ["/register"];
 
 async function isLoggedIn(req: NextRequest): Promise<boolean> {
   const token = req.cookies.get("lifeup_session")?.value;

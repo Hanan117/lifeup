@@ -4,7 +4,7 @@ import { getSessionUserId } from "@/lib/auth";
 
 export default async function Home() {
   const userId = await getSessionUserId();
-  if (userId) redirect("/dashboard");
+  if (userId) redirect("/login");
   return (
     <main className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
       <div className="max-w-lg text-center space-y-5">

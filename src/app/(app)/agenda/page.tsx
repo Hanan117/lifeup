@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import AgendaCheck from "@/components/AgendaCheck";
 import AgendaQuickDelete from "@/components/AgendaQuickDelete";
+import Time from "@/components/Time";
 
 const PALETTE = [
   { dot: "bg-cyan-400", text: "text-cyan-300", hex: "#22d3ee" },
@@ -23,10 +24,6 @@ function catTheme(cat: string | null): { dot: string; text: string } {
 
 function keyOf(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function hm(d: Date): string {
-  return d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }).replace(".", ":");
 }
 
 function isoWeek(d: Date): number {
@@ -193,7 +190,7 @@ export default async function AgendaPage({
                     <span className="text-[11px] font-semibold text-white leading-tight truncate">
                       Tgl {new Date(a.startTime).getDate()}: {a.title}
                     </span>
-                    <span className="text-[10px] text-slate-400 leading-tight truncate">{a.description || a.location || hm(new Date(a.startTime))}</span>
+                    <span className="text-[10px] text-slate-400 leading-tight truncate">{a.description || a.location || <Time date={new Date(a.startTime)} />}</span>
                   </span>
                   <AgendaQuickDelete id={a.id} />
                 </Link>
@@ -270,8 +267,8 @@ export default async function AgendaPage({
                               return (
                                 <div key={a.id} className="flex items-center gap-1 text-[11px] min-w-0">
                                   <AgendaCheck id={a.id} done={doneA} />
-                                  <Link href={`/agenda/${a.id}/edit`} className={`truncate ${doneA ? "text-slate-500 line-through" : th.text}`}>
-                                    {hm(new Date(a.startTime))} {a.title}
+<Link href={`/agenda/${a.id}/edit`} className={`truncate ${doneA ? "text-slate-500 line-through" : th.text}`}>
+                                    <Time date={new Date(a.startTime)} /> {a.title}
                                   </Link>
                                 </div>
                               );
@@ -304,7 +301,7 @@ export default async function AgendaPage({
                     <div className="flex flex-col gap-1.5">
                       {list.map((a: any) => (
                         <div key={a.id} className="flex items-center gap-2.5 text-sm">
-                          <span className="font-mono text-[11px] text-slate-400 shrink-0 w-24">{hm(new Date(a.startTime))}–{hm(new Date(a.endTime))}</span>
+                          <span className="font-mono text-[11px] text-slate-400 shrink-0 w-24"><Time date={new Date(a.startTime)} />–<Time date={new Date(a.endTime)} /></span>
                           <span className={`w-2 h-2 rounded-full shrink-0 ${catTheme(a.category).dot}`} />
                           <AgendaCheck id={a.id} done={a.status === "COMPLETED"} />
                           <Link href={`/agenda/${a.id}/edit`} className={`truncate hover:underline ${a.status === "COMPLETED" ? "text-slate-500 line-through" : "text-slate-100"}`}>
@@ -338,7 +335,7 @@ export default async function AgendaPage({
                   {monthAgendas.map((a: any) => (
                     <tr key={a.id} className="hover:bg-slate-800/30">
                       <td className="py-2 px-3 font-mono text-[11px] text-slate-400 whitespace-nowrap">{new Date(a.startTime).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}</td>
-                      <td className="py-2 px-3 font-mono text-[11px] text-slate-400 whitespace-nowrap">{hm(new Date(a.startTime))}–{hm(new Date(a.endTime))}</td>
+                      <td className="py-2 px-3 font-mono text-[11px] text-slate-400 whitespace-nowrap"><Time date={new Date(a.startTime)} />–<Time date={new Date(a.endTime)} /></td>
                       <td className="py-2 px-3">
                         <span className="flex items-center gap-2 min-w-0">
                           <AgendaCheck id={a.id} done={a.status === "COMPLETED"} />

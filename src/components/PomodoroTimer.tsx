@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ensureAudio, playBeep } from "@/lib/format";
+import { loadPomoState, savePomoState, clearPomoState, type PomoMode, type PomoStatus } from "@/lib/pomoState";
 
 export type FocusTask = { id: string; title: string };
 
-const DURATIONS = [15, 25, 50];
+const DURATIONS = [2, 15, 25, 50];
 const BREAKS = [5, 10];
 const TOTAL_SESSIONS = 4;
 const WARN_AT = 60; // alarm lembut saat sisa 60 detik
@@ -15,28 +17,8 @@ function fmt(totalSec: number) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function beep(freq = 880, durMs = 300, delayMs = 0) {
-  try {
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    const ctx = new Ctx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.value = freq;
-    const t = ctx.currentTime + delayMs / 1000;
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(0.2, t + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + durMs / 1000);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(t);
-    osc.stop(t + durMs / 1000 + 0.05);
-  } catch {
-    // audio tidak tersedia — abaikan
-  }
-}
-
-type Status = "idle" | "running" | "paused" | "break" | "done";
-type Mode = "focus" | "break";
+type Status = PomoStatus;
+type Mode = PomoMode;
 
 function readDuration(): number {
   try {
@@ -71,6 +53,7 @@ export default function PomodoroTimer({ tasks }: { tasks: FocusTask[] }) {
   const [showSettings, setShowSettings] = useState(false);
   const [warned, setWarned] = useState(false);
   const endAtRef = useRef(0);
+  const lastWarnRef = useRef(0);
   const settingsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -78,9 +61,44 @@ export default function PomodoroTimer({ tasks }: { tasks: FocusTask[] }) {
     // jadi preferensi user hanya boleh dibaca di client pasca-mount.
     /* eslint-disable react-hooks/set-state-in-effect -- mount-only sync dari localStorage */
     const d = readDuration();
+    const b = readBreak();
     setDurationMin(d);
-    setRemain(d * 60);
-    setBreakMin(readBreak());
+    setBreakMin(b);
+
+    const saved = loadPomoState();
+    if (saved) {
+      const now = Date.now();
+      if (saved.status === "running" || saved.status === "break") {
+        if (saved.endAt > now) {
+          const left = Math.max(0, Math.round((saved.endAt - now) / 1000));
+          setDurationMin(saved.durationMin);
+          setBreakMin(saved.breakMin);
+          setRemain(left);
+          setMode(saved.mode);
+          setStatus(saved.status);
+          setSession(saved.session);
+          endAtRef.current = saved.endAt;
+          lastWarnRef.current = 0;
+          setWarned(left <= WARN_AT);
+        } else {
+          clearPomoState();
+        }
+      } else if (saved.status === "paused") {
+        setDurationMin(saved.durationMin);
+        setBreakMin(saved.breakMin);
+        setRemain(Math.max(0, saved.remain));
+        setMode(saved.mode);
+        setStatus("paused");
+        setSession(saved.session);
+        endAtRef.current = saved.endAt;
+        lastWarnRef.current = 0;
+        setWarned(saved.remain <= WARN_AT);
+      } else {
+        setRemain(d * 60);
+      }
+    } else {
+      setRemain(d * 60);
+    }
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
@@ -92,21 +110,41 @@ export default function PomodoroTimer({ tasks }: { tasks: FocusTask[] }) {
     return () => window.removeEventListener("mousedown", onClick);
   }, []);
 
+  // Simpan state pomodoro ke localStorage agar bisa lanjut saat pindah halaman
+  /* eslint-disable react-hooks/exhaustive-deps -- save on relevant state changes */
+  useEffect(() => {
+    if (status === "running" || status === "paused" || status === "break") {
+      savePomoState({
+        endAt: endAtRef.current,
+        remain,
+        mode,
+        status,
+        session,
+        durationMin,
+        breakMin,
+      });
+    } else {
+      clearPomoState();
+    }
+  }, [status, mode, session, durationMin, breakMin]);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
   // Detak timer — dihitung dari timestamp agar akurat walau tab tidak aktif
   useEffect(() => {
     if (status !== "running" && status !== "break") return;
     const t = setInterval(() => {
       const left = Math.max(0, Math.round((endAtRef.current - Date.now()) / 1000));
       setRemain(left);
-      if (left === WARN_AT && !warned) {
-        setWarned(true);
-        beep(660, 350);
+      // Alarm lembut berulang setiap 5 detik saat sisa <= 1 menit
+      if (left <= WARN_AT && left > 0 && Date.now() - lastWarnRef.current > 5000) {
+        lastWarnRef.current = Date.now();
+        playBeep(660, 350);
       }
       if (left <= 0) {
         clearInterval(t);
         if (status === "running") {
-          beep(880, 400);
-          beep(880, 400, 500);
+          playBeep(880, 400);
+          playBeep(880, 400, 500);
           if (session >= TOTAL_SESSIONS) {
             setStatus("done");
           } else {
@@ -116,7 +154,7 @@ export default function PomodoroTimer({ tasks }: { tasks: FocusTask[] }) {
             endAtRef.current = Date.now() + breakMin * 60 * 1000;
           }
         } else {
-          beep(880, 400);
+          playBeep(880, 400);
           setMode("focus");
           setStatus("idle");
           setSession((s) => Math.min(TOTAL_SESSIONS, s + 1));
@@ -128,17 +166,20 @@ export default function PomodoroTimer({ tasks }: { tasks: FocusTask[] }) {
   }, [status, warned, breakMin, durationMin, session]);
 
   function start() {
+    ensureAudio();
     if (status === "done") {
       setSession(1);
       setMode("focus");
       setRemain(durationMin * 60);
       setWarned(false);
+      lastWarnRef.current = 0;
       endAtRef.current = Date.now() + durationMin * 60 * 1000;
       setStatus("running");
       return;
     }
     // mulai baru, lanjutkan jeda, atau lanjutkan istirahat — selalu dari sisa waktu
     endAtRef.current = Date.now() + remain * 1000;
+    lastWarnRef.current = 0;
     if (status === "idle") setWarned(remain <= WARN_AT);
     setStatus(mode === "break" ? "break" : "running");
   }
@@ -148,13 +189,16 @@ export default function PomodoroTimer({ tasks }: { tasks: FocusTask[] }) {
   }
 
   function reset() {
+    ensureAudio();
     setStatus("idle");
     setMode("focus");
     setRemain(durationMin * 60);
     setWarned(false);
+    lastWarnRef.current = 0;
   }
 
   function skip() {
+    ensureAudio();
     if (mode === "break") {
       setMode("focus");
       setStatus("idle");
@@ -170,6 +214,7 @@ export default function PomodoroTimer({ tasks }: { tasks: FocusTask[] }) {
       }
     }
     setWarned(false);
+    lastWarnRef.current = 0;
   }
 
   function pickDuration(m: number) {
@@ -197,7 +242,7 @@ export default function PomodoroTimer({ tasks }: { tasks: FocusTask[] }) {
     status === "done" ? "Sesi Selesai 🎉" : mode === "break" ? "Istirahat" : status === "running" ? "Mode: Fokus Aktif" : status === "paused" ? "Jeda" : "Mode: Siap Fokus";
 
   return (
-    <div className="rounded-2xl bg-[#111724] border border-white/10 p-5 sm:p-6 max-w-2xl mx-auto">
+    <div className="w-full p-5 sm:p-6">
       <div className="flex items-center justify-between gap-2">
         <h1 className="font-extrabold text-white tracking-tight">⚡ FOCUS POMODORO</h1>
         <div ref={settingsRef} className="relative">
@@ -320,8 +365,7 @@ export default function PomodoroTimer({ tasks }: { tasks: FocusTask[] }) {
       </div>
 
       <div className="mt-4 pt-4 border-t border-white/10">
-        <p className="text-xs text-zinc-400">🔔 Status Pengingat:</p>
-        <p className="mt-1 text-xs text-zinc-500">• Alarm lembut akan berbunyi saat waktu sisa 01:00 min</p>
+        <p className="text-xs text-zinc-400">⏳ Pengingat 1 Menit Terakhir:</p>
         {remain <= WARN_AT && (status === "running" || status === "break") && (
           <p className="mt-1 text-xs text-amber-300 font-semibold">⏳ Kurang dari 1 menit tersisa!</p>
         )}

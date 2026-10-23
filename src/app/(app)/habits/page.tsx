@@ -117,9 +117,7 @@ export default async function HabitsPage({
     return { days: daysArr, done, total, pct: total ? Math.round((done / total) * 100) : 0 };
   });
 
-  const nearestTarget = goals.length
-    ? new Date(goals[0].targetDate).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }).toUpperCase()
-    : "—";
+
 
   const W = 600;
   const H = 90;
@@ -256,28 +254,7 @@ export default async function HabitsPage({
 
       {/* Wishlist + weekly execution */}
       <section className="grid grid-cols-12 gap-3.5">
-        <div className="col-span-12 lg:col-span-3 bg-[#0e131d] border border-[#1b263b] rounded-xl p-4">
-          <div className="bg-[#0c2e35] border border-[#155e75] rounded-xl py-2 text-center mb-3">
-            <h3 className="text-xs font-bold tracking-widest text-cyan-300">GOAL &amp; WISHLIST</h3>
-          </div>
-          <ol className="space-y-2.5 text-[13px]">
-            {goals.map((g: any, i: number) => (
-              <li key={g.id} className="flex gap-2 text-slate-200">
-                <span className="text-cyan-400 font-mono font-bold shrink-0">{i + 1}.</span>
-                <Link href={`/goals/${g.id}`} className="hover:text-cyan-300 transition leading-snug">{g.title}</Link>
-              </li>
-            ))}
-            {goals.length === 0 && (
-              <li className="text-slate-500 text-xs">Belum ada goal. <Link href="/goals/new" className="text-cyan-300">Buat dulu</Link></li>
-            )}
-          </ol>
-          <div className="mt-4 pt-3 border-t border-[#1b263b] flex items-center justify-between text-[10px] font-mono">
-            <span className="text-slate-500 tracking-widest">TARGET REVIEW</span>
-            <span className="text-cyan-300 font-bold">{nearestTarget}</span>
-          </div>
-        </div>
-
-        <div className="col-span-12 lg:col-span-9 bg-[#0e131d] border border-[#1b263b] rounded-xl p-4">
+        <div className="col-span-12 bg-[#0e131d] border border-[#1b263b] rounded-xl p-4">
           <div className="bg-[#0c2e35] border border-[#155e75] rounded-xl py-2 text-center mb-4">
             <h3 className="text-xs font-bold tracking-widest text-cyan-300">WEEKLY GOALS EXECUTION</h3>
           </div>
