@@ -15,9 +15,153 @@ model user_lifeup {
   @@map("user-lifeup")
 }
 
+model User {
+  id           String     @id @default(cuid())
+  name         String?
+  email        String     @unique
+  passwordHash String?
+  avatar       String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  goals        Goal[]
+  tasks        Task[]
+  habits       Habit[]
+  habitLogs    HabitLog[]
+  agendas      Agenda[]
+}
 
-model user {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+model Goal {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  category    String?
+  startDate   DateTime?
+  targetDate  DateTime?
+  progress    Int        @default(0)
+  status      GoalStatus @default(NOT_STARTED)
+  period      GoalPeriod @default(YEARLY)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  habits      Habit[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model Task {
+  id                String     @id @default(cuid())
+  title             String
+  description       String?
+  priority          Priority   @default(MEDIUM)
+  status            TaskStatus @default(TODO)
+  dueDate           DateTime?
+  estimatedDuration Int?
+  order             Int        @default(0)
+  goalId            String?
+  goal              Goal?      @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  userId            String
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([goalId])
+}
+
+model Habit {
+  id          String    @id @default(cuid())
+  title       String
+  name        String?
+  description String?
+  frequency   Frequency @default(DAILY)
+  target      Int       @default(1)
+  icon        String    @default("target")
+  startDate   DateTime?
+  color       String    @default("#22c55e")
+  goalId      String?
+  goal        Goal?     @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs        HabitLog[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model HabitLog {
+  id        String   @id @default(cuid())
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  completed Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([habitId, date])
+  @@index([userId])
+  @@index([habitId, date])
+}
+
+model Agenda {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime?
+  allDay      Boolean      @default(false)
+  category    String?
+  location    String?
+  status      AgendaStatus @default(SCHEDULED)
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([startTime])
+}
+
+enum GoalPeriod {
+  YEARLY
+  MONTHLY
+}
+
+enum GoalStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+  ACTIVE
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  CUSTOM
+}
+
+enum AgendaStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  PLANNED
 }
