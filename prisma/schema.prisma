@@ -1,6 +1,3 @@
-// LifeUp — Prisma schema (sesuai PRD 2026-10-02 §4, Fase 1 ORM saja)
-// Generator + datasource untuk Prisma v6 + PostgreSQL lokal (Docker).
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,135 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id           String     @id @default(cuid())
-  name         String
-  email        String     @unique
-  passwordHash String
-  avatar       String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  goals        Goal[]
-  tasks        Task[]
-  habits       Habit[]
-  habitLogs    HabitLog[]
-  agendas      Agenda[]
-}
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user_lifeup {
+  id         BigInt   @id @default(autoincrement())
+  created_at DateTime @default(now()) @db.Timestamptz(6)
 
-model Goal {
-  id          String     @id @default(cuid())
-  title       String
-  description String?
-  category    String?
-  startDate   DateTime
-  targetDate  DateTime
-  progress    Int        @default(0)
-  status      GoalStatus @default(NOT_STARTED)
-  period      GoalPeriod @default(YEARLY)
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks       Task[]
-  habits      Habit[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-}
-
-model Task {
-  id                String     @id @default(cuid())
-  title             String
-  description       String?
-  priority          Priority   @default(MEDIUM)
-  status            TaskStatus @default(TODO)
-  dueDate           DateTime?
-  estimatedDuration Int?
-  goalId            String?
-  goal              Goal?      @relation(fields: [goalId], references: [id], onDelete: SetNull)
-  userId            String
-  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-}
-
-model Habit {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  frequency   Frequency @default(DAILY)
-  target      Int       @default(1)
-  startDate   DateTime
-  color       String    @default("#8B5CF6")
-  goalId      String?
-  goal        Goal?     @relation(fields: [goalId], references: [id], onDelete: SetNull)
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  logs        HabitLog[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-}
-
-model HabitLog {
-  id        String   @id @default(cuid())
-  habitId   String
-  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  date      DateTime @db.Date
-  completed Boolean  @default(true)
-  createdAt DateTime @default(now())
-
-  @@unique([habitId, date])
-}
-
-model Agenda {
-  id          String       @id @default(cuid())
-  title       String
-  description String?
-  startTime   DateTime
-  endTime     DateTime
-  category    String?
-  location    String?
-  status      AgendaStatus @default(SCHEDULED)
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-}
-
-enum GoalPeriod {
-  YEARLY
-  MONTHLY
-}
-
-enum GoalStatus {
-  NOT_STARTED
-  IN_PROGRESS
-  COMPLETED
-  ARCHIVED
-}
-
-enum TaskStatus {
-  TODO
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
-}
-
-enum Frequency {
-  DAILY
-  WEEKLY
-  CUSTOM
-}
-
-enum AgendaStatus {
-  SCHEDULED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
+  @@map("user-lifeup")
 }
