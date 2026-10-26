@@ -72,8 +72,7 @@ model Task {
 
 model Habit {
   id          String    @id @default(cuid())
-  title       String
-  name        String?
+  name        String
   description String?
   frequency   Frequency @default(DAILY)
   target      Int       @default(1)

@@ -20,7 +20,7 @@ export async function PATCH(req: Request) {
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const ok = await verifyPassword(parsed.data.currentPassword, user.passwordHash);
+  const ok = await verifyPassword(parsed.data.currentPassword, user.passwordHash ?? "");
   if (!ok) return NextResponse.json({ error: "Kata sandi lama salah" }, { status: 400 });
 
   await db.user.update({

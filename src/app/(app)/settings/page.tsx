@@ -8,5 +8,5 @@ export default async function SettingsPage() {
   if (!userId) redirect("/login");
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) redirect("/login");
-  return <SettingsClient name={user.name} email={user.email} />;
+  return <SettingsClient name={user.name ?? ""} email={user.email} />;
 }

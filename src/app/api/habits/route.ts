@@ -23,8 +23,14 @@ export async function POST(req: Request) {
   const d = parsed.data;
   const habit = await db.habit.create({
     data: {
-      name: d.name, description: d.description || null, color: d.color,
-      goalId: d.goalId || null, startDate: new Date(d.startDate), userId,
+      name: d.name,
+      description: d.description || null,
+      color: d.color,
+      frequency: d.frequency,
+      target: d.target,
+      goalId: d.goalId || null,
+      startDate: new Date(d.startDate),
+      userId,
     },
   });
   return NextResponse.json(habit, { status: 201 });

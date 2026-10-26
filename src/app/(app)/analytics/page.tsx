@@ -127,7 +127,7 @@ export default async function AnalyticsPage() {
       <div className="flex items-center gap-3 flex-wrap">
         <SearchTrigger />
         <div className="md:hidden">
-          <UserMenu userName={user.name} userEmail={user.email} align="right" position="down" />
+          <UserMenu userName={user.name ?? ""} userEmail={user.email} align="right" position="down" />
         </div>
       </div>
 

@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     );
   }
   const user = candidates[0];
-  if (!(await verifyPassword(password, user.passwordHash))) {
+  if (!(await verifyPassword(password, user.passwordHash ?? ""))) {
     return NextResponse.json({ error: "Email atau password salah" }, { status: 401 });
   }
   await createSession(user.id, remember);

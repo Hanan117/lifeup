@@ -28,7 +28,7 @@ export default async function GoalDetailPage({ params }: { params: Promise<{ id:
           <div className="h-full bg-blue-500" style={{ width: `${pct}%` }} />
         </div>
         <p className="mt-1 text-xs text-zinc-500">{done}/{goal.tasks.length} task selesai • {pct}%</p>
-        <p className="text-xs text-zinc-500">{new Date(goal.startDate).toLocaleDateString("id-ID")} → {new Date(goal.targetDate).toLocaleDateString("id-ID")}</p>
+        <p className="text-xs text-zinc-500">{goal.startDate ? new Date(goal.startDate).toLocaleDateString("id-ID") : "-"} → {goal.targetDate ? new Date(goal.targetDate).toLocaleDateString("id-ID") : "-"}</p>
         <GoalActions id={goal.id} />
       </div>
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">

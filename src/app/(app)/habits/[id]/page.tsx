@@ -51,11 +51,10 @@ export default async function HabitDetailPage({ params }: { params: Promise<{ id
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold" style={{ backgroundColor: habit.color }}>
-            {habit.name.charAt(0).toUpperCase()}
+            {habit.name?.charAt(0).toUpperCase() ?? "H"}
           </div>
           <div>
-            <p className="text-xs uppercase text-zinc-500">{freq} • Target: {habit.target}x/hari</p>
-            <h1 className="text-2xl font-bold text-white">{habit.name}</h1>
+            <h1 className="text-2xl font-bold text-white">{habit.name ?? "Habit"}</h1>
           </div>
         </div>
         {habit.description && <p className="text-sm text-zinc-400 mb-3">{habit.description}</p>}
@@ -73,7 +72,7 @@ export default async function HabitDetailPage({ params }: { params: Promise<{ id
             <p className="text-xs text-zinc-500">Frekuensi</p>
           </div>
         </div>
-        <p className="text-xs text-zinc-500">Mulai: {new Date(habit.startDate).toLocaleDateString("id-ID")}</p>
+        {habit.startDate ? <p className="text-xs text-zinc-500">Mulai: {new Date(habit.startDate).toLocaleDateString("id-ID")}</p> : null}
         <HabitActions id={habit.id} />
       </div>
     </div>

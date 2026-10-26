@@ -75,7 +75,7 @@ export default async function DashboardPage() {
         <SearchTrigger />
         <NewEntryMenu />
         <div className="md:hidden">
-          <UserMenu userName={user.name} userEmail={user.email} align="right" position="down" />
+          <UserMenu userName={user.name ?? ""} userEmail={user.email} align="right" position="down" />
         </div>
       </div>
 
@@ -87,7 +87,7 @@ export default async function DashboardPage() {
           {lifeHealth >= 70 ? "Optimal" : lifeHealth > 0 ? "Berkembang" : "Mulai isi datamu"}
         </p>
         <div className="mt-2">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Selamat datang, {user.name.split(" ")[0]}</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Selamat datang, {(user.name ?? "Pengguna").split(" ")[0]}</h1>
           <p className="mt-1 text-sm text-zinc-400">{dateId}</p>
         </div>
       </section>
@@ -127,7 +127,7 @@ export default async function DashboardPage() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-zinc-100 truncate">{a.title}</p>
                   <p className="text-[11px] text-zinc-500">
-                    {new Date(a.startTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} - {new Date(a.endTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB{a.location ? ` • ${a.location}` : ""}
+                    {new Date(a.startTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} - {a.endTime ? new Date(a.endTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-"} WIB{a.location ? ` • ${a.location}` : ""}
                   </p>
                 </div>
               </li>
