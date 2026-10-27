@@ -2,8 +2,15 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
 const COOKIE = "lifeup_session";
+const authSecret = process.env.AUTH_SECRET;
+if (!authSecret) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SECRET environment variable is not set");
+  }
+  console.warn("AUTH_SECRET environment variable is not set, using development fallback");
+}
 const secret = new TextEncoder().encode(
-  process.env.AUTH_SECRET ?? "dev-secret-change-me-min-32-chars!!"
+  authSecret ?? "dev-secret-change-me-min-32-chars!!"
 );
 
 export async function createSession(userId: string, remember: boolean) {

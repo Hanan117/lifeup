@@ -42,7 +42,7 @@ export default function RegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal mendaftar");
-      router.push("/dashboard");
+      router.replace("/dashboard");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal mendaftar");
