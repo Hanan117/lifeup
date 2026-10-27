@@ -41,7 +41,7 @@ export default function NewAgendaPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal");
-      router.push("/agenda"); router.refresh();
+      router.push("/agenda");
     } catch (err) { setError(err instanceof Error ? err.message : "Gagal"); }
     finally { setLoading(false); }
   }

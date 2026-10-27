@@ -54,7 +54,7 @@ export default function EditHabitPage() {
       const res = await fetch(`/api/habits/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sanitizeForm(form)) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal");
-      router.push(`/habits/${id}`); router.refresh();
+      router.push(`/habits/${id}`);
     } catch (err) { setError(err instanceof Error ? err.message : "Gagal"); }
     finally { setLoading(false); }
   }
@@ -62,7 +62,7 @@ export default function EditHabitPage() {
   async function remove() {
     if (!confirm("Hapus habit ini? Semua catatan centang akan terhapus.")) return;
     await fetch(`/api/habits/${id}`, { method: "DELETE" });
-    router.push("/habits"); router.refresh();
+    router.push("/habits");
   }
 
   if (!form) return <p className="text-zinc-500 text-sm">Memuat...</p>;

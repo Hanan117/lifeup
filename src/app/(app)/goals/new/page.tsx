@@ -27,7 +27,7 @@ function Form() {
       const res = await fetch("/api/goals", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sanitizeForm(form)) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal menyimpan");
-      router.push("/goals"); router.refresh();
+      router.push("/goals");
     } catch (err) { setError(err instanceof Error ? err.message : "Gagal"); }
     finally { setLoading(false); }
   }

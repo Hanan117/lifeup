@@ -52,7 +52,7 @@ function Form() {
       const res = await fetch(`/api/tasks/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sanitizeForm(form)) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal");
-      router.push(backHref); router.refresh();
+      router.push(backHref);
     } catch (err) { setError(err instanceof Error ? err.message : "Gagal"); }
     finally { setLoading(false); }
   }
@@ -60,7 +60,7 @@ function Form() {
   async function remove() {
     if (!confirm("Hapus task ini?")) return;
     await fetch(`/api/tasks/${id}`, { method: "DELETE" });
-    router.push(backHref); router.refresh();
+    router.push(backHref);
   }
 
   if (!form) return <p className="text-zinc-500 text-sm">Memuat...</p>;

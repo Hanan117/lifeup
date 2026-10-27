@@ -37,7 +37,7 @@ function Form() {
       const res = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sanitizeForm(form)) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal");
-      router.push(form.goalId ? "/goals" : "/tasks"); router.refresh();
+      router.push(form.goalId ? "/goals" : "/tasks");
     } catch (err) { setError(err instanceof Error ? err.message : "Gagal"); }
     finally { setLoading(false); }
   }

@@ -49,7 +49,7 @@ export default function EditAgendaPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal");
-      router.push("/agenda"); router.refresh();
+      router.push("/agenda");
     } catch (err) { setError(err instanceof Error ? err.message : "Gagal"); }
     finally { setLoading(false); }
   }
@@ -57,7 +57,7 @@ export default function EditAgendaPage() {
   async function remove() {
     if (!confirm("Hapus agenda ini?")) return;
     await fetch(`/api/agendas/${id}`, { method: "DELETE" });
-    router.push("/agenda"); router.refresh();
+    router.push("/agenda");
   }
 
   if (!form) return <p className="text-zinc-500 text-sm">Memuat...</p>;

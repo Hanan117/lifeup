@@ -42,8 +42,11 @@ export default function RegisterPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Gagal mendaftar");
+      // router.replace sudah memicu server re-render (invalidates cache),
+      // jangan panggil router.refresh() beruntutan — itu menyebabkan race
+      // condition antara dua server request yang bisa menghasilkan HTML
+      // berbeda (cookie belum ter-propagate) → React #441 hydration mismatch.
       router.replace("/dashboard");
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal mendaftar");
     } finally {
