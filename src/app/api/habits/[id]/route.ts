@@ -52,14 +52,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     where: { id },
     data: {
       name: d.name,
+      title: d.name,
       description: d.description || null,
       color: d.color,
       frequency: d.frequency,
       target: d.target,
       startDate: new Date(d.startDate),
       goalId: d.goalId || null,
+      icon: (d as any).icon ?? "target",
     },
-  });
+  } as any);
   return NextResponse.json(updated);
 }
 

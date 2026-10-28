@@ -25,6 +25,7 @@ export async function POST(req: Request) {
     const habit = await db.habit.create({
       data: {
         name: d.name,
+        title: d.name,
         description: d.description || null,
         color: d.color,
         frequency: d.frequency,
@@ -32,10 +33,12 @@ export async function POST(req: Request) {
         goalId: d.goalId || null,
         startDate: new Date(d.startDate),
         userId,
-      },
+        icon: (d as any).icon ?? "target",
+      } as any,
     });
     return NextResponse.json(habit, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ error: "Gagal menyimpan habit" }, { status: 500 });
+    console.error("habit create error:", err);
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Gagal menyimpan habit" }, { status: 500 });
   }
 }
